@@ -1,1 +1,1 @@
-rootProject.name = "Cloud-IDE"
+rootProject.name = "CodeFleet-Backend"
