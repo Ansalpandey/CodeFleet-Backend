@@ -10,7 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 class WebSocketConfig(private val dockerTerminalHandler: DockerTerminalWebSocketHandler) : WebSocketConfigurer {
   override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-    registry.addHandler(dockerTerminalHandler, "/ws/docker-terminal")
+    registry.addHandler(dockerTerminalHandler, "/terminal")
       .setAllowedOriginPatterns("*")
   }
 }

@@ -23,6 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-websocket")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
+  implementation("org.json:json:20250107")
   implementation("org.jetbrains.pty4j:pty4j:0.13.2")
   implementation("org.apache.commons:commons-exec:1.3") // For process management
   implementation("commons-io:commons-io:2.15.1")

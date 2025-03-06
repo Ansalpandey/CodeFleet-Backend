@@ -19,7 +19,9 @@ class SecurityConfig {
     http.csrf {
       it.disable()
     }.cors(Customizer.withDefaults()).authorizeHttpRequests {
-      it.anyRequest().permitAll()
+      it.requestMatchers(
+        "/api/auth/**",
+      )
     }
     return http.build()
   }

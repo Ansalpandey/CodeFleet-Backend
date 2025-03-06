@@ -41,7 +41,6 @@ class DockerService(
           .withPortBindings(portBinding)
           .withNetworkMode("bridge")
       )
-      .withCmd("npm", "run", "start") // Ensure command is executed
       .exec()
 
     // Start the container
