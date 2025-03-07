@@ -1,16 +1,26 @@
 package com.app.cloudide.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.annotation.Nonnull
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "users")
-@TypeAlias("User")
+@TypeAlias("user")
 data class User(
-    @Id var id: String? = null,
-    var username: String? = null,
-    var password: String? = null,
-    var email: String? = null,
-    var firstName: String? = null,
-    var lastName: String? = null,
+  @Id
+  val id: ObjectId? = null,
+  @Nonnull
+  val username: String,
+  @Nonnull
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  var password: String,
+  @Nonnull
+  val firstName: String,
+  @Nonnull
+  val lastName: String,
+  @Nonnull
+  val email: String
 )
