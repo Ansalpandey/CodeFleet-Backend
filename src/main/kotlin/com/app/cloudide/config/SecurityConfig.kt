@@ -48,7 +48,9 @@ class SecurityConfig(
           "/actuator/**",
           "/",
           "/api/user/register",
-          "/api/user/login"
+          "/api/user/login",
+          "/api/**",
+          "/terminal/**"
         ).permitAll().anyRequest()
           .authenticated()
       }

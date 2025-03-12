@@ -11,23 +11,22 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class FileController(private val fileService: FileService) {
 
-//  @GetMapping("/list")
-//  fun listDirectory(@RequestParam(required = false) path: String?): ResponseEntity<List<FileInfo>> {
-//    return ResponseEntity.ok(fileService.listDirectory(path))
-//  }
-
   @GetMapping("/list")
   fun listFiles(
     @RequestParam containerId: String,
-    @RequestParam(defaultValue = "/app") basePath: String
+    @RequestParam(defaultValue = "/workspace") basePath: String
   ): List<Map<String, Any>> {
     return fileService.listDirectory(containerId, basePath)
   }
 
   @GetMapping("/read")
-  fun readFile(@RequestParam path: String): ResponseEntity<FileResponse> {
-    return ResponseEntity.ok(fileService.readFile(path))
+  fun readFile(
+    @RequestParam containerId: String,
+    @RequestParam path: String
+  ): ResponseEntity<FileResponse> {
+    return ResponseEntity.ok(fileService.readFile(containerId, path))
   }
+
 
   @PostMapping("/update")
   fun updateFile(@RequestBody request: FileRequest): ResponseEntity<Map<String, String>> {

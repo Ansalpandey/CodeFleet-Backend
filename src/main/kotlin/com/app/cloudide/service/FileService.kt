@@ -1,7 +1,7 @@
 package com.app.cloudide.service
 
-import com.app.cloudide.dto.FileInfo
 import com.app.cloudide.dto.FileResponse
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 import java.net.URLDecoder
@@ -15,31 +15,71 @@ class FileService(
 ) {
 
   fun listDirectory(containerId: String, basePath: String = "/app"): List<Map<String, Any>> {
-    return dockerService.getBaseFolderContents(containerId, basePath)
+
+    val logger = LoggerFactory.getLogger("DirectoryTraversalLogger")
+    val result = mutableListOf<Map<String, Any>>()
+    val queue = mutableListOf(basePath)
+
+    logger.info("Starting directory traversal for containerId: $containerId")
+
+    while (queue.isNotEmpty()) {
+      val currentPath = queue.removeAt(0)
+      logger.info("Processing directory: $currentPath")
+
+      // Skip the node_modules directory
+      if (currentPath.endsWith("node_modules")) {
+        logger.info("Skipping node_modules directory: $currentPath")
+        continue
+      }
+
+      val contents = dockerService.getBaseFolderContents(containerId, currentPath)
+      logger.info("Found ${contents.size} items in directory: $currentPath")
+
+      for (item in contents) {
+        val path = item["path"] as String
+        val isDirectory = item["isDirectory"] as Boolean
+
+        // Skip any item inside the node_modules directory
+        if (path.contains("node_modules")) {
+          logger.debug("Skipping item inside node_modules: $path")
+          continue
+        }
+
+        result.add(item)
+        logger.debug("Added item to result: $path")
+
+        if (isDirectory) {
+          queue.add(path) // Add subdirectory to the queue for processing
+          logger.debug("Added subdirectory to queue: $path")
+        }
+      }
+    }
+
+    logger.info("Directory traversal completed. Total items processed: ${result.size}")
+    return result
   }
 
-  fun readFile(path: String): FileResponse {
+  fun readFile(containerId: String, path: String): FileResponse {
     return try {
       val decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8.name())
-      val file = File(decodedPath)
 
-      if (!file.exists()) return FileResponse.Error("File or directory does not exist")
+      // Run the cat command inside the Docker container to read the file
+      val command = listOf("docker", "exec", containerId, "cat", decodedPath)
+      val process = ProcessBuilder(command).start()
+      val content = process.inputStream.bufferedReader().readText()
+      val error = process.errorStream.bufferedReader().readText()
+      val exitCode = process.waitFor()
 
-      if (file.isDirectory) {
-        val files = file.listFiles()?.map {
-          FileInfo(it.name, it.isDirectory, it.absolutePath)
-        } ?: emptyList()
-        FileResponse.DirectoryContent(files)
-      } else {
-        val content = Files.readString(Paths.get(decodedPath))
+      if (exitCode == 0) {
         FileResponse.FileContent(content)
+      } else {
+        FileResponse.Error("Failed to read file: $error")
       }
-    } catch (e: SecurityException) {
-      FileResponse.Error("Access denied")
     } catch (e: Exception) {
-      FileResponse.Error("Unable to read file or directory: ${e.message}")
+      FileResponse.Error("Unable to read file: ${e.message}")
     }
   }
+
 
   fun updateFile(path: String, content: String): String {
     Files.writeString(Paths.get(path), content)
