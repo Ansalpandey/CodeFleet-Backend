@@ -11,7 +11,7 @@ class DockerController(private val dockerService: DockerService) {
   @PostMapping("/create")
   fun createContainer(): ResponseEntity<String> {
     return try {
-      ResponseEntity.ok(dockerService.createAndStartContainer("nextjs-template:latest", "NextJS-App", 3000, 3000))
+      ResponseEntity.ok(dockerService.createAndStartContainer("next-js-template:latest", "NextJS-App", 3000, 3000))
     } catch (e: IllegalStateException) {
       ResponseEntity.badRequest().body(e.message)
     } catch (e: Exception) {
